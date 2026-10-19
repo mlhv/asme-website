@@ -1,0 +1,7 @@
+.superpowers/
+dist/
+.venv/
+__pycache__/
+*.xlsx
+service-account*.json
+.env
