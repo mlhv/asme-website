@@ -1,0 +1,85 @@
+name: Build and deploy site
+
+on:
+  schedule:
+    - cron: "17 */3 * * *"
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions: {} # each job asks only for what it needs
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20 # a hung Google call must not hold the pages concurrency group
+    permissions:
+      contents: read # checkout
+      actions: write # keepalive step re-enables this workflow via the Actions API
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install
+        run: pip install -c constraints.txt -e '.[dev]'
+      - name: Test
+        run: pytest
+      - name: Build site
+        run: python -m asmesite.build --out dist
+        env:
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+          CONTENT_SHEET_ID: ${{ vars.CONTENT_SHEET_ID }}
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+      # GitHub pauses cron after 60 days without repo activity; re-enabling via the API keeps it alive.
+      - name: Keep scheduled builds enabled
+        if: github.event_name == 'schedule'
+        continue-on-error: true
+        run: gh api -X PUT "repos/${GITHUB_REPOSITORY}/actions/workflows/build.yml/enable"
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write # deploy-pages publishes to GitHub Pages
+      id-token: write # deploy-pages verifies the deploy source via OIDC
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
+
+  # GitHub only emails scheduled-run failures to whoever last edited this workflow,
+  # so also open (or comment on) an issue that repo watchers get notified about.
+  notify-failure:
+    needs: [build, deploy]
+    if: ${{ failure() && github.event_name == 'schedule' }}
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: Open or update the failure issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          TITLE: Scheduled site build is failing
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          number=$(gh issue list --state open --limit 200 --json number,title \
+            --jq 'map(select(.title == env.TITLE))[0].number // empty')
+          body="Scheduled build failed: $RUN_URL. The previous site is still live. See docs/TECHNICAL.md, \"When the scheduled build fails\"."
+          if [ -n "$number" ]; then
+            gh issue comment "$number" --body "$body"
+          else
+            gh issue create --title "$TITLE" --body "$body"
+          fi

@@ -5,3 +5,4 @@ __pycache__/
 *.xlsx
 service-account*.json
 .env
+*.egg-info/

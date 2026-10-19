@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ASME · Drexel</title>
+<meta name="description" content="{{ s.intro }}">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="static/style.css">
+<script src="static/app.js" defer></script>
+</head>
+<body>
+{% set discord = s.discord_url | safe_url %}
+{% set instagram = s.instagram_url | safe_url %}
+{% set photos_url = s.photos_folder_url | safe_url %}
+{% set email = s.contact_email | safe_email %}
+{% macro join_buttons() %}
+{% if discord or instagram %}
+<div class="buttons">
+  {% if discord %}<a class="btn btn-primary" href="{{ discord }}" target="_blank" rel="noopener">Join our Discord</a>{% endif %}
+  {% if instagram %}<a class="btn btn-secondary" href="{{ instagram }}" target="_blank" rel="noopener">Instagram</a>{% endif %}
+</div>
+{% endif %}
+{% endmacro %}
+{% macro card(img_id, title, meta, description, team) %}
+<article class="card">
+  {% set src = img_id | img %}
+  {% if src %}
+  <img class="card-img" src="{{ src }}" alt="{{ title }}" loading="lazy">
+  {% else %}
+  <div class="card-img placeholder" aria-hidden="true"></div>
+  {% endif %}
+  <div class="card-body">
+    <h3>{{ title }}</h3>
+    {% if meta %}<p class="meta">{{ meta }}</p>{% endif %}
+    {% if description %}<p>{{ description }}</p>{% endif %}
+    {% if team %}<p class="team">{{ team }}</p>{% endif %}
+  </div>
+</article>
+{% endmacro %}
+
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="#top">ASME · Drexel</a>
+    <nav aria-label="Sections">
+      <a href="#events">Events</a>
+      {% if d.photos %}<a href="#photos">Photos</a>{% endif %}
+      {% if d.competitions %}<a href="#competitions">Competitions</a>{% endif %}
+      {% if d.projects %}<a href="#projects">Projects</a>{% endif %}
+      {% if d.board %}<a href="#board">Board</a>{% endif %}
+      <a href="#join">Join</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+<section id="top" class="hero" style="background-image: url('{{ d.hero or 'static/hero-fallback.jpg' }}')">
+  <div class="hero-overlay">
+    <div class="wrap">
+      <h1>{{ s.tagline }}</h1>
+      <p class="lead">{{ s.intro }}</p>
+      {{ join_buttons() }}
+    </div>
+  </div>
+</section>
+
+<section id="events" class="section">
+  <div class="wrap">
+    <h2>Upcoming events</h2>
+    {% if d.upcoming %}
+    <div class="event-grid">
+      {% for e in d.upcoming %}
+      {% set cover = e.cover_image_id | img %}
+      <button type="button" class="event-card" data-dialog="ev-{{ loop.index0 }}">
+        {% if cover %}<img class="event-img" src="{{ cover }}" alt="" loading="lazy">{% endif %}
+        <span class="event-body">
+          <span class="when">{{ e | when }}</span>
+          <span class="event-name">{{ e.name }}</span>
+          {% if e.location %}<span class="where">{{ e.location }}</span>{% endif %}
+          <span class="more">Details →</span>
+        </span>
+      </button>
+      {% endfor %}
+    </div>
+    {% for e in d.upcoming %}
+    {% set cover = e.cover_image_id | img %}
+    <dialog id="ev-{{ loop.index0 }}" aria-labelledby="ev-{{ loop.index0 }}-title">
+      <div class="dialog-inner">
+        <button type="button" class="dialog-close" data-close aria-label="Close">×</button>
+        {% if cover %}<img class="dialog-img" src="{{ cover }}" alt="">{% endif %}
+        <p class="when">{{ e | when }}</p>
+        <h3 id="ev-{{ loop.index0 }}-title">{{ e.name }}</h3>
+        {% if e.location %}<p class="where">{{ e.location }}</p>{% endif %}
+        <div class="desc">
+          {% for p in e.description | paragraphs %}
+          <p>{{ p }}</p>
+          {% endfor %}
+        </div>
+        <div class="buttons">
+          {% set rsvp = e.rsvp_link | safe_url %}
+          {% if e.rsvp_required and rsvp %}
+          <a class="btn btn-primary" href="{{ rsvp }}" target="_blank" rel="noopener">RSVP</a>
+          {% endif %}
+          <a class="btn btn-secondary" href="{{ e | gcal }}" target="_blank" rel="noopener">Add to Google Calendar</a>
+        </div>
+      </div>
+    </dialog>
+    {% endfor %}
+    {% else %}
+    {% if instagram %}
+    <p class="empty"><a href="{{ instagram }}" target="_blank" rel="noopener">New events coming soon — follow us on Instagram.</a></p>
+    {% else %}
+    <p class="empty">New events coming soon — follow us on Instagram.</p>
+    {% endif %}
+    {% endif %}
+  </div>
+</section>
+
+{% if d.past %}
+<section id="earlier" class="section section-tint">
+  <div class="wrap">
+    <h2>Earlier this year</h2>
+    <ul class="earlier-list">
+      {% for e in d.past %}
+      <li><span class="date">{{ e.date.strftime('%b') }} {{ e.date.day }}</span> · {{ e.name }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+</section>
+{% endif %}
+
+{% if d.photos %}
+<section id="photos" class="section">
+  <div class="wrap">
+    <h2>Recent photos</h2>
+    <div class="photo-grid">
+      {% for p in d.photos %}
+      <img src="{{ p }}" alt="Recent ASME event photo" loading="lazy">
+      {% endfor %}
+    </div>
+    {% if photos_url %}
+    <p class="see-all"><a href="{{ photos_url }}" target="_blank" rel="noopener">See all photos →</a></p>
+    {% endif %}
+  </div>
+</section>
+{% endif %}
+
+{% if d.competitions %}
+<section id="competitions" class="section section-tint">
+  <div class="wrap">
+    <h2>Competitions</h2>
+    <div class="card-grid">
+      {% for c in d.competitions %}
+      {% set meta = [c.competition, c.year, c.placement] | select | join(' · ') %}
+      {{ card(c.photo_id, c.project or c.competition, meta, c.description, c.team) }}
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% if d.projects %}
+<section id="projects" class="section">
+  <div class="wrap">
+    <h2>Robotics projects</h2>
+    <div class="card-grid">
+      {% for p in d.projects %}
+      {{ card(p.photo_id, p.name, p.status, p.description, p.team) }}
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% if d.board %}
+<section id="board" class="section section-tint">
+  <div class="wrap">
+    <h2>Meet the board</h2>
+    <ul class="board-grid">
+      {% for m in d.board %}
+      {% set src = m.headshot_id | img %}
+      <li class="member">
+        {% if src %}
+        <img class="avatar" src="{{ src }}" alt="{{ m.name }}" loading="lazy" width="112" height="112">
+        {% else %}
+        <span class="avatar initials" aria-hidden="true">{{ m.name | initials }}</span>
+        {% endif %}
+        <span class="member-name">{{ m.name }}</span>
+        <span class="member-role">{{ m.role }}</span>
+        {% set sub = [m.major, m.year] | select | join(' · ') %}
+        {% if sub %}<span class="member-sub">{{ sub }}</span>{% endif %}
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+</section>
+{% endif %}
+</main>
+
+<footer id="join" class="section join">
+  <div class="wrap">
+    <h2>Come build with us</h2>
+    <p class="lead">No sign-up needed — join the Discord, follow us on Instagram, and come to any event.</p>
+    {{ join_buttons() }}
+    {% if email %}
+    <p class="contact">Questions? <a href="mailto:{{ email }}">{{ email }}</a></p>
+    {% endif %}
+    <p class="updated">Updated {{ d.built_at | stamp }}</p>
+  </div>
+</footer>
+</body>
+</html>
