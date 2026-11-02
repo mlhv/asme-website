@@ -39,7 +39,7 @@ Each year gets a new tracker file. To switch:
 2. Paste the new tracker's link next to **Event Tracker Link**. If Sheets offers to replace the link with the file name (a "smart chip"), say no and keep the plain link. A chip hides the link from the website, and the site stops updating.
 3. Share the new tracker with the website's service account (our robot reader): `website-builder@drexel-asme-website.iam.gserviceaccount.com`. Viewer access is enough.
 
-If you skip step 3, the site can't read the tracker and won't update. (This is the planned address. If sharing says the address isn't found, ask the Technical Coordinator to confirm it.)
+If you skip step 3, the site can't read the tracker and won't update.
 
 Tip: share the tracker only with board accounts and the service account, not with "anyone with the link". The website doesn't need it to be public.
 

@@ -24,17 +24,38 @@ GitHub Pages (deploy job)
 
 ## Accounts and secrets
 
+**Current setup (temporary).** Everything still lives under the founding Technical Coordinator's personal accounts. [Moving to the club accounts](#moving-to-the-club-accounts) below is the plan to fix that before they graduate.
+
 | Thing | Where / who |
 | --- | --- |
-| GitHub org | `drexel-asme`; owners `drexelasme.technical@gmail.com` and `drexelasme@gmail.com` |
-| Google Cloud project | `drexel-asme-website`, owned by the technical account, President added as Owner |
+| GitHub repo | `mlhv/asme-website` (personal account) |
+| Live site | https://mlhv.github.io/asme-website/ |
+| Google Cloud project | "Drexel ASME Website" (ID `drexel-asme-website`), inside the founder's personal Google Cloud organization |
 | Service account | `website-builder@drexel-asme-website.iam.gserviceaccount.com` |
 | `GOOGLE_SERVICE_ACCOUNT_JSON` | GitHub repo **secret** (Settings > Secrets and variables > Actions): the full key JSON |
 | `CONTENT_SHEET_ID` | GitHub repo **variable** (same page): the Website Content sheet's ID |
+| Pages | repo Settings > Pages > Source: **GitHub Actions** |
 
-That service-account address is the planned one. Once it exists, confirm the exact address in the Google Cloud console (IAM & Admin > Service accounts) and update this file and the board guide if it differs.
+**Target setup (after the move).**
+
+| Thing | Where / who |
+| --- | --- |
+| GitHub | org `drexel-asme`, repo `drexel-asme.github.io`, owners `drexelasme.technical@gmail.com` and `drexelasme@gmail.com` |
+| Live site | https://drexel-asme.github.io |
+| Google Cloud project | owned by `drexelasme.technical@gmail.com`, with `drexelasme@gmail.com` also an Owner |
 
 The service account needs Viewer access to: the event tracker, the Website Content sheet, the Robotics sheet, the photo dump folder, and the Website Images folder.
+
+### If Google blocks creating a key
+
+New Google Cloud organizations enforce a policy, "Disable service account key creation" (`iam.disableServiceAccountKeyCreation`), that makes **Add key** fail with "Service account key creation is disabled". This happened with the current project. To allow keys for this one project only:
+
+1. In the project picker, select the **organization** (not the project). IAM & Admin > IAM > Grant access: your own account, role **Organization Policy Administrator**.
+2. Switch back to the project. IAM & Admin > Organization Policies > "Disable service account key creation" (the legacy `iam.disableServiceAccountKeyCreation` one) > Manage policy > **Override parent's policy** > add a rule with Enforcement **Off** > Set policy.
+3. Check the newer `iam.managed.disableServiceAccountKeyCreation` too; override it the same way only if it shows Enforced.
+4. Wait a minute, then create the key.
+
+Keep the key only in the GitHub secret; delete local copies after testing.
 
 ## Rotating the service-account key
 
@@ -109,6 +130,33 @@ A **Test** step failure means a code or dependency problem; run `.venv/bin/pytes
 ### Scheduled runs pausing
 
 GitHub pauses scheduled workflows after 60 days without repo activity. A "Keep scheduled builds enabled" step in the workflow re-enables it via the API on each scheduled run, which guards against this. Still, at the start of each term check that the Actions tab shows recent scheduled runs, and re-enable the workflow there if it is paused.
+
+## Moving to the club accounts
+
+Do this before the founder leaves, so nothing depends on one student's personal account. Transfer, don't just add collaborators: a repo or project that stays personal still breaks at graduation.
+
+**GitHub**
+
+1. Signed in as `drexelasme.technical@gmail.com`, create the GitHub org `drexel-asme` (free plan). Add the President's account (`drexelasme@gmail.com`'s GitHub user) as a second owner.
+2. In `mlhv/asme-website`: Settings > General > Danger Zone > **Transfer ownership** to `drexel-asme`.
+3. Rename the repo to `drexel-asme.github.io` (Settings > General). The site moves to https://drexel-asme.github.io. GitHub redirects the old repo URL, but **not** the old `mlhv.github.io/asme-website/` site address.
+4. Check Settings > Secrets and variables > Actions: `GOOGLE_SERVICE_ACCOUNT_JSON` and `CONTENT_SHEET_ID` should have moved with the repo; re-add them if not. Check Settings > Pages > Source is still **GitHub Actions**.
+5. Make a small commit to `.github/workflows/build.yml` (e.g. a comment) from the technical account, so GitHub's failure emails go to it. Then Actions > Run workflow and confirm it goes green.
+6. Have the technical and President accounts **watch** the repo so they get failure issues.
+7. On your machine: `git remote set-url origin https://github.com/drexel-asme/drexel-asme.github.io.git`.
+8. Update the live-site address in the Settings tab's links, Instagram bio, Linktree and so on. Reprint any QR codes.
+9. Update the "Current setup" table above and the README.
+
+**Google Cloud**
+
+1. In the project: IAM & Admin > IAM > Grant access: `drexelasme.technical@gmail.com` and `drexelasme@gmail.com`, role **Owner**. The service account, its key, and all the sheet sharing keep working unchanged.
+2. The project still sits inside the founder's personal Cloud organization. To cut that tie completely, recreate it under the technical account instead: new project > enable the Sheets and Drive APIs > new `website-builder` service account and key (see "If Google blocks creating a key") > replace the `GOOGLE_SERVICE_ACCOUNT_JSON` secret > share the tracker, Website Content sheet, Robotics sheet, photo dump and Website Images with the **new** service-account email > run the workflow > delete the old project. Update the service-account address here and in [BOARD_GUIDE.md](BOARD_GUIDE.md).
+
+**Google Drive**
+
+Transfer ownership of the Website Content sheet, the photo dump folder and the Website Images folder to a role account (Share > the owner's name > Transfer ownership). Photos that members uploaded stay owned by them, which is fine.
+
+Finally, remove the founder's personal account from the org, project and Drive sharing (see the turnover checklist).
 
 ## Turnover checklist
 
