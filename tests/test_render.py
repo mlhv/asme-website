@@ -151,3 +151,12 @@ def test_plain_https_urls_render(render):
     assert [a["href"] for a in soup.find_all("a", string="Join our Discord")] == [SETTINGS.discord_url] * 2
     assert [a["href"] for a in soup.find_all("a", string="Join on DragonLink")] == [SETTINGS.dragonlink_url] * 2
     assert soup.find("a", string=lambda s: s and "See all photos" in s)["href"] == SETTINGS.photos_folder_url
+
+
+def test_logo_used_for_favicon_and_header(render, tmp_path):
+    soup = render(site())
+    assert soup.select_one('link[rel="icon"]')["href"] == "static/logo.png"
+    assert soup.select_one("header .brand img")["src"] == "static/logo.png"
+    assert soup.select_one('link[rel="apple-touch-icon"]')["href"] == "static/apple-touch-icon.png"
+    for name in ("logo.png", "apple-touch-icon.png"):
+        assert (tmp_path / "static" / name).is_file()
