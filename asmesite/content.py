@@ -5,6 +5,7 @@ import math
 from asmesite.ids import drive_id
 from asmesite.models import BoardMember, Competition, Project, Settings
 
+DEFAULT_DRAGONLINK = "https://drexel.campuslabs.com/engage/organization/drexelasme"
 DEFAULT_TAGLINE = "Build things. Meet engineers."
 DEFAULT_INTRO = ("Drexel's chapter of the American Society of Mechanical Engineers: "
                  "workshops, competitions, robotics, and free food.")
@@ -84,6 +85,7 @@ def parse_settings(values: list[list[object]]) -> Settings:
         photos_folder_id=drive_id(photos_url),
         tagline=get("tagline") or DEFAULT_TAGLINE,
         intro=get("intro") or DEFAULT_INTRO,
+        dragonlink_url=get("dragonlink link") or DEFAULT_DRAGONLINK,
     )
 
 

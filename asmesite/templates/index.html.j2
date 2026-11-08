@@ -14,12 +14,14 @@
 <body>
 {% set discord = s.discord_url | safe_url %}
 {% set instagram = s.instagram_url | safe_url %}
+{% set dragonlink = s.dragonlink_url | safe_url %}
 {% set photos_url = s.photos_folder_url | safe_url %}
 {% set email = s.contact_email | safe_email %}
 {% macro join_buttons() %}
-{% if discord or instagram %}
+{% if discord or dragonlink or instagram %}
 <div class="buttons">
   {% if discord %}<a class="btn btn-primary" href="{{ discord }}" target="_blank" rel="noopener">Join our Discord</a>{% endif %}
+  {% if dragonlink %}<a class="btn btn-secondary" href="{{ dragonlink }}" target="_blank" rel="noopener">Join on DragonLink</a>{% endif %}
   {% if instagram %}<a class="btn btn-secondary" href="{{ instagram }}" target="_blank" rel="noopener">Instagram</a>{% endif %}
 </div>
 {% endif %}
@@ -202,7 +204,7 @@
 <footer id="join" class="section join">
   <div class="wrap">
     <h2>Come build with us</h2>
-    <p class="lead">No sign-up needed — join the Discord, follow us on Instagram, and come to any event.</p>
+    <p class="lead">Join us on DragonLink and Discord, follow us on Instagram, and come to any event.</p>
     {{ join_buttons() }}
     {% if email %}
     <p class="contact">Questions? <a href="mailto:{{ email }}">{{ email }}</a></p>

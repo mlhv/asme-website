@@ -87,7 +87,8 @@ def demo_data() -> SiteData:
                         "asme@example.edu", "https://drive.google.com/drive/folders/example", None,
                         "Build, break, and learn with Drexel ASME.",
                         "We're Drexel's mechanical engineering student chapter: workshops, competitions, "
-                        "robotics, and free food. Everyone is welcome.")
+                        "robotics, and free food. Everyone is welcome.",
+                        "https://drexel.campuslabs.com/engage/organization/drexelasme")
     return SiteData(
         settings=settings, upcoming=upcoming, past=past, photos=[], hero=None,
         competitions=[

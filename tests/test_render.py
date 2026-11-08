@@ -8,11 +8,12 @@ from asmesite.events import TZ
 from asmesite.models import BoardMember, Competition, Event, Project, Settings
 from asmesite.render import SiteData, render_site
 
-JOIN = "No sign-up needed — join the Discord, follow us on Instagram, and come to any event."
+JOIN = "Join us on DragonLink and Discord, follow us on Instagram, and come to any event."
 EMPTY = "New events coming soon — follow us on Instagram."
 
 SETTINGS = Settings("trk", None, "https://discord.gg/x", "https://instagram.com/x", "asme@example.edu",
-                    "https://drive.google.com/drive/folders/f", None, "Build things with us", "We are ASME.")
+                    "https://drive.google.com/drive/folders/f", None, "Build things with us", "We are ASME.",
+                    "https://drexel.campuslabs.com/engage/organization/drexelasme")
 
 
 def ev(name="Workshop", description="Learn things.", rsvp_required=False, rsvp_link=None):
@@ -133,10 +134,11 @@ def test_javascript_rsvp_link_dropped(render):
 
 
 def test_unsafe_settings_links_omitted(render):
-    bad = replace(SETTINGS, discord_url=" JavaScript:alert(1)", photos_folder_url="data:text/html,x",
+    bad = replace(SETTINGS, discord_url=" JavaScript:alert(1)", dragonlink_url="javascript:alert(1)", photos_folder_url="data:text/html,x",
                   contact_email="javascript:alert(1)//@x.com")
     soup = render(site(settings=bad))
     assert not soup.find("a", string="Join our Discord")
+    assert not soup.find("a", string="Join on DragonLink")
     assert not soup.find("a", string=lambda s: s and "See all photos" in s)
     assert not soup.select('a[href^="mailto:"]')
     assert len(soup.find_all("a", string="Instagram")) == 2
@@ -147,4 +149,5 @@ def test_plain_https_urls_render(render):
     soup = render(site(upcoming=[ev(rsvp_required=True, rsvp_link="HTTPS://forms.gle/r ")]))
     assert soup.find(id="ev-0").find("a", string="RSVP")["href"] == "HTTPS://forms.gle/r"
     assert [a["href"] for a in soup.find_all("a", string="Join our Discord")] == [SETTINGS.discord_url] * 2
+    assert [a["href"] for a in soup.find_all("a", string="Join on DragonLink")] == [SETTINGS.dragonlink_url] * 2
     assert soup.find("a", string=lambda s: s and "See all photos" in s)["href"] == SETTINGS.photos_folder_url

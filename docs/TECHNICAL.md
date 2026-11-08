@@ -20,7 +20,7 @@ GitHub Pages (deploy job)
 - Content sheet tabs are `Settings` (required), `Board`, `Competitions`; the Robotics sheet needs a `Projects` tab. Missing optional tabs just leave that section empty.
 - Images are fetched from Drive once each and converted to WebP. The newest 12 photos (`PHOTO_COUNT` in `asmesite/build.py`) appear in the grid, and the hero uses the newest landscape one.
 - Event publish rule (`asmesite/tracker.py`): Date present and the `Approved` row in the `Event Form` section checked (TRUE, yes, or x). Only whitelisted rows are read: Event, Event Description, Date, Start Time, End Time, Location, RSVP?, RSVP Link, Cover Image.
-- Content sheet: `Show` is true when it reads yes, true, or x (any case). Settings names (column Setting): Event Tracker Link (required), Robotics Sheet Link, Discord Invite Link, Instagram Link, Contact Email, Photo Folder Link, Tagline, Intro. Board has no Show column.
+- Content sheet: `Show` is true when it reads yes, true, or x (any case). Settings names (column Setting): Event Tracker Link (required), Robotics Sheet Link, Discord Invite Link, Instagram Link, DragonLink Link (defaults to the club's DragonLink page when blank), Contact Email, Photo Folder Link, Tagline, Intro. Board has no Show column.
 
 ## Accounts and secrets
 

@@ -21,6 +21,7 @@ def test_settings_full():
         ["Robotics Sheet Link", ROBOTICS],
         ["Discord  Invite Link", "https://discord.gg/x"],
         ["Instagram Link", "https://instagram.com/x"],
+        ["DragonLink Link", "https://drexel.campuslabs.com/engage/organization/other"],
         ["Contact Email", "a@b.c"],
         ["Photo Folder Link", f"https://drive.google.com/drive/folders/{TRACKER}"],
         ["Tagline", "Hi"],
@@ -29,6 +30,7 @@ def test_settings_full():
     assert s.tracker_id == TRACKER
     assert s.robotics_sheet_id == ROBOTICS
     assert s.discord_url == "https://discord.gg/x"
+    assert s.dragonlink_url.endswith("/organization/other")
     assert s.photos_folder_id == TRACKER
     assert s.photos_folder_url.endswith(TRACKER)
     assert (s.tagline, s.intro) == ("Hi", "Yo")
@@ -40,6 +42,7 @@ def test_settings_defaults_and_optional():
     assert s.intro.startswith("Drexel's chapter")
     assert s.robotics_sheet_id is None
     assert s.photos_folder_id is None
+    assert s.dragonlink_url == "https://drexel.campuslabs.com/engage/organization/drexelasme"
 
 
 def test_settings_missing_tracker_raises():

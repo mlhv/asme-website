@@ -56,6 +56,7 @@ class Settings:
     photos_folder_id: str | None
     tagline: str
     intro: str
+    dragonlink_url: str = ""
 
 
 @dataclass(frozen=True)
